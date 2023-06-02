@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\pause.png" />
+    <None Remove="Resources\play.png" />
+    <None Remove="Resources\stop.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PlugIns\PlugIns.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\pause.png" />
+    <Resource Include="Resources\play.png" />
+    <Resource Include="Resources\stop.png" />
+  </ItemGroup>
+
+</Project>
