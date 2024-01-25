@@ -32,10 +32,10 @@
                 <MenuItem Header="Open" Click="ClickB"></MenuItem>
                 <MenuItem Header="Exit" Click="ExitB"></MenuItem>
             </MenuItem>
-            <MenuItem Header="Subtitles">
-                <MenuItem Header="Open" Name="Menu_Open" Click="MenuClick_Open"></MenuItem>
-                <MenuItem Header="Save" Name="Menu_Save" Click="MenuClick_Save"></MenuItem>
-                <MenuItem Header="Save Translation" Click="MenuClick_SaveTrans" Name="Menu_SaveTrans" IsEnabled="{Binding ElementName=Translation, Path=IsChecked}"></MenuItem>
+            <MenuItem Header="Subtitles" SubmenuOpened="submenu">
+                <MenuItem Header="Open" Name="Menu_Open"></MenuItem>
+                <MenuItem Header="Save" Name="Menu_Save"></MenuItem>
+                <MenuItem Header="Save Translation" Name="Menu_SaveTrans" IsEnabled="{Binding ElementName=Translation, Path=IsChecked}"></MenuItem>
                 <Separator></Separator>
                 <MenuItem Header="Trabslation" Name="Translation" IsCheckable="True" Click="TransaltionB"></MenuItem>
             </MenuItem>
@@ -105,7 +105,7 @@
                         <Slider Width="{Binding Path=ActualWidth, ElementName=Item3}" Name="MovieSlider" VerticalAlignment="Center" IsMoveToPointEnabled="True" ValueChanged="Slider_ValChanged"></Slider>
                     </StatusBarItem>
                     <StatusBarItem Grid.Column="3">
-                        <ProgressBar Name="VolumeSlider" VerticalAlignment="Center" Value="{Binding ElementName=Media, Path=Volume, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Minimum="0" Maximum="1" Height="20" Width="100"></ProgressBar>
+                        <ProgressBar Name="VolumeSlider" VerticalAlignment="Center" Value="{Binding ElementName=Media, Path=Volume, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Minimum="0" Maximum="1" Height="20" Width="100" MouseDown="Volume_Click"></ProgressBar>
                     </StatusBarItem>
                 </StatusBar>
             </Grid>

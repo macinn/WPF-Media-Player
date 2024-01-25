@@ -149,6 +149,7 @@ namespace WpfLab2
             //DataG.Items.Refresh();
 
             Directory.CreateDirectory(PluginsPath);
+            LoadPlugins();
         }
 
         // https://www.c-sharpcorner.com/article/simple-plugin-architecture-using-reflection-with-wpf-projects/
@@ -167,26 +168,84 @@ namespace WpfLab2
                     if (type != null)
                     {
                         win = (ISubtitlesPlugin)Activator.CreateInstance(type);
-
+                        
                         if (win.MenuItem.HasFlag(ActionItem.Save))
                         {
-                            ClickActions[ActionItem.Save] = (sender, e) => win.Save(rows, Translation.IsChecked);
+                            bool flag = true;
+                            foreach (var item in Menu_Save.Items)
+                            {
+                                if (((MenuItem)item).Header.Equals(win.Name)) flag = false;
+                            }
+                            if (!flag) break;
+                            var menu = new MenuItem();
+                            menu.Header = win.Name;
+                            menu.Click += (sender, e) =>
+                            {
+                                try
+                                {
+                                    win.Save(rows, false);
+                                }
+                                catch
+                                {
+                                    MessageBox.Show("Plugin error!", "Plugin erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                                    Menu_Open.Items.Remove(menu);
+                                }
+                            };
+                            Menu_Save.Items.Add(menu);
                         }
                         if (win.MenuItem.HasFlag(ActionItem.SaveTranslation))
                         {
-                            ClickActions[ActionItem.SaveTranslation] = (sender, e) => win.Save(rows, Translation.IsChecked);
+                            bool flag = true;
+                            foreach (var item in Translation.Items)
+                            {
+                                if (((MenuItem)item).Header.Equals(win.Name)) flag = false;
+                            }
+                            if (!flag) break;
+                            var menu = new MenuItem();
+                            menu.Header = win.Name;
+                            menu.Click +=
+                            (sender, e) =>
+                            {
+                                try
+                                {
+                                    win.Save(rows, true);
+                                }
+                                catch
+                                {
+                                    MessageBox.Show("Plugin error!", "Plugin erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                                    Menu_Open.Items.Remove(menu);
+                                }
+                            };
+                            Menu_SaveTrans.Items.Add(menu);
                         }
                         if (win.MenuItem.HasFlag(ActionItem.Open))
                         {
-                            ClickActions[ActionItem.Open] = (sender, e) =>
+                            bool flag = true;
+                            foreach (var item in Menu_Open.Items)
                             {
-                                ICollection<DataItem>? col = win.Load(Translation.IsChecked);
-                                rows.Clear();
-                                foreach (DataItem item in col)
+                                if (((MenuItem)item).Header.Equals(win.Name)) flag = false;
+                            }
+                            if (!flag) break;
+                            var menu = new MenuItem();
+                            menu.Header = win.Name;
+                            menu.Click += (sender, e) =>
+                            {
+                                try
                                 {
-                                    rows.Add(item);
+                                    ICollection<DataItem>? col = win.Load(Translation.IsChecked);
+                                    rows.Clear();
+                                    foreach (DataItem item in col)
+                                    {
+                                        rows.Add(item);
+                                    }
+                                }
+                                catch
+                                {
+                                    MessageBox.Show("Plugin error!", "Plugin erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                                    Menu_Open.Items.Remove(menu);
                                 }
                             };
+                            Menu_Open.Items.Add(menu);
                         }
                     }
 
@@ -292,6 +351,8 @@ namespace WpfLab2
         private void Media_MouseWheel(object sender, MouseWheelEventArgs e)
         {
             Media.Volume += (e.Delta > 0) ? 0.1 : -0.1;
+            if(Media.Volume<0) Media.Volume = 0;
+            if(Media.Volume>1) Media.Volume = 1;
         }
 
         private void Media_Click(object sender, MouseButtonEventArgs e)
@@ -392,17 +453,28 @@ namespace WpfLab2
 
         private void MenuClick(object sender, RoutedEventArgs e, ActionItem item)
         {
-            if (ClickActions.ContainsKey(item))
+            try
             {
-                ClickActions[item](sender, e);
-            }
-            else
-            {
-                LoadPlugins();
                 if (ClickActions.ContainsKey(item))
                 {
                     ClickActions[item](sender, e);
                 }
+                else
+                {
+                    LoadPlugins();
+                    if (ClickActions.ContainsKey(item))
+                    {
+                        ClickActions[item](sender, e);
+                    }
+                    else
+                    {
+                        MessageBox.Show("No matching plugin!", "Plugin erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+            catch
+            {
+                MessageBox.Show("No matching plugin!", "Plugin erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -437,6 +509,19 @@ namespace WpfLab2
                 item.Start = MainWindow.rows.Max(x => x.End);
                 item.End = MainWindow.rows.Max(x => x.End);
             }
+        }
+
+        private void submenu(object sender, RoutedEventArgs e)
+        {
+            LoadPlugins();
+        }
+
+        private void Volume_Click(object sender, MouseButtonEventArgs e)
+        {
+            double pos = e.GetPosition(VolumeSlider).X;
+            double vol = pos/VolumeSlider.Width;
+            VolumeSlider.Value = vol;
+            Media.Volume = vol;
         }
     }
 }

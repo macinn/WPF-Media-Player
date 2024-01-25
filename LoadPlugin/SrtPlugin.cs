@@ -1,3 +1,4 @@
+using Microsoft.Win32;
 using Plugins;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ namespace SrtPlugin
 {
     internal class LoadPluginClass : ISubtitlesPlugin
     {
-        public string Name => "SrtPlugin";
+        public string Name => "SubRip";
 
         public string Extension => ".srt";
 
@@ -21,6 +22,7 @@ namespace SrtPlugin
         public ICollection<DataItem> Load(bool loadTranslation)
         {
             var dialog = new Microsoft.Win32.OpenFileDialog();
+            dialog.Filter = "Pliki (*.srt)|*.srt";
 
             bool? result = dialog.ShowDialog();
             ObservableCollection<DataItem>? collection = new ObservableCollection<DataItem>();
@@ -44,12 +46,15 @@ namespace SrtPlugin
                     string[] spans = line.Split(" --> ");
                     item.Start = TimeSpan.Parse(spans[0]);
                     item.End = TimeSpan.Parse(spans[1]);
-                    if (!loadTranslation)
-                        item.Text = sr.ReadLine();
-                    else
-                        item.TextTrans = sr.ReadLine();
+                    while(!line.Equals(String.Empty))
+                    {
+                        if (!loadTranslation)
+                            item.Text += sr.ReadLine();
+                        else
+                            item.TextTrans += sr.ReadLine();
+                        line = sr.ReadLine();
+                    }                  
                     collection.Add(item);
-                    line = sr.ReadLine();
                     line = sr.ReadLine();
                 }
             }
@@ -58,8 +63,11 @@ namespace SrtPlugin
 
         public void Save(ICollection<DataItem> subtitles, bool saveTranslation)
         {
-            var dialog = new Microsoft.Win32.OpenFileDialog();
-
+            var dialog = new SaveFileDialog();
+            dialog.DefaultExt = this.Extension;
+            dialog.Filter = "Pliki (*.srt)|*.srt";
+            dialog.FilterIndex = 1;
+            dialog.FileName = "Nowyplik" + this.Extension;
             bool? result = dialog.ShowDialog();
 
             if (result == false)
